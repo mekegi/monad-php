@@ -13,19 +13,17 @@ class Chain extends Maybe {
 
     public function __get($name) {
         return $this->bind(function($obj) use($name) {
-            if (isset($obj->$name)) {
-                return $obj->$name;
-            }
-            return null;
+            return isset($obj->$name)
+                ? $obj->$name
+                : null;
         });
     }
 
     public function __call($name, array $args = array()) {
         return $this->bind(function($obj) use ($name, $args) {
-            if (is_callable(array($obj, $name))) {
-                return call_user_func_array(array($obj, $name), $args);
-            }
-            return null;
+            return is_callable(array($obj, $name))
+                ? call_user_func_array(array($obj, $name), $args)
+                : null;
         });
     }
 

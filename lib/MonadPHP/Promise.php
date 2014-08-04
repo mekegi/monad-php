@@ -2,9 +2,9 @@
 
 namespace MonadPHP;
 
-class Promise extends Monad {
+use BadMethodCallException;
 
-    const unit = "MonadPHP\Promise::unit";
+class Promise extends Monad {
 
     protected $isResolved = false;
     protected $succeed = null;
@@ -19,22 +19,21 @@ class Promise extends Monad {
     }
 
     public static function unit($success = null, $failure = null) {
-        return new Promise($success, $failure); 
+        return new Promise($success, $failure);
     }
 
     public function bind($success, $failure) {
-        $obj = $this->unit($success, $failure);
-        if ($this->isResolved) {
-            $obj->resolve($this->succeed, $this->value);
-        } else {
-            $this->children[] = $obj;
-        }
+        $obj = static::unit($success, $failure);
+        $this->isResolved
+            ? $obj->resolve($this->succeed, $this->value)
+            : $this->children[] = $obj;
+
         return $obj;
     }
 
     protected function resolve($status, $value) {
         if ($this->isResolved) {
-            throw new \BadMethodCallException('Promise already resolved');
+            throw new BadMethodCallException('Promise already resolved');
         }
         $this->value = $value;
         $this->isResolved = true;
